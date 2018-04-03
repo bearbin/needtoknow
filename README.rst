@@ -98,6 +98,21 @@ specify this as another dictionary entry:
 
 Note that this folder must already exist.
 
+By default, all items are placed in one folder. However, needtoknow also
+supports writing items into subfolders with the names of their respective feeds.
+This can be enabled by adding another configuration option:
+
+.. code-block:: json
+
+    {
+      "host":"imap.gmail.com",
+      "login":"example@gmail.com",
+      "password":"correct horse battery staple",
+      "subfolders":true
+    }
+
+Note that these subfolders must all already exist.
+
 feeds.json
 ^^^^^^^^^^
 The feeds you want to monitor are provided as a dictionary, wherein each entry

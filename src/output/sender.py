@@ -12,12 +12,17 @@ from feeders.base import download
 EMBED_THRESHHOLD = 1024 * 1024 * 15
 
 class Sender(object):
+    def feed_folder(self, entry):
+        subfolder = ('/' + entry.name) if self.subfolders else ''
+        return '"' + self.folder + subfolder + '"'
+
     def __init__(self, conf):
         self.host = str(conf['host'])
         self.port = str(conf.get('port', '993'))
         self.login = str(conf['login'])
         self.password = str(conf['password'])
         self.folder = str(conf.get('folder', 'INBOX'))
+        self.subfolders = bool(conf.get('subfolders', False))
         self.conn = None
 
     def connect(self):
@@ -117,5 +122,5 @@ class Sender(object):
         else:
             stamp = time.time()
         log.info('  Sending "%s"...' % entry.subject)
-        self.conn.append('INBOX' if self.folder is None else self.folder, '',
+        self.conn.append(self.feed_folder(entry), '',
             imaplib.Time2Internaldate(stamp), m.as_string().encode('utf-8', 'replace'))
