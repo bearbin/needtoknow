@@ -9,7 +9,7 @@ from feeders.base import SyncRequest
 RECONNECT_ATTEMPTS = 3
 
 def get_resource_path(root, name):
-    return os.path.join(root, 'cache/%s.pickle.bz2' % name)
+    return os.path.join(root, '%s.pickle.bz2' % name)
 
 def construct_feeder(root, name, log):
     try:
@@ -46,8 +46,12 @@ def main():
         help='include a particular feed by name')
     parser.add_argument('--check-connection', action='store_true',
         help='check whether we have an internet connection first')
-    parser.add_argument('--config', default=os.path.expanduser('~/.needtoknow'),
+    parser.add_argument('--config', default=os.path.expanduser('~/.config/needtoknow'),
         help='configuration location')
+    parser.add_argument('--data', default=os.path.expanduser('~/.local/share/needtoknow'),
+        help='data location')
+    parser.add_argument('--feeds', default='feeds.json',
+        help='name of feeds file to check')
     parser.add_argument('--dry-run', action='store_true',
         help='scan feeds but don\'t send any updates')
     parser.add_argument('--debug', action='store_true',
@@ -92,7 +96,7 @@ def main():
         return -1
 
     try:
-        with open(os.path.join(opts.config, 'feeds.json')) as f:
+        with open(os.path.join(opts.config, opts.feeds)) as f:
             feeds = json.load(f)
         if not isinstance(feeds, collections.Mapping):
             raise TypeError('feeds is not a JSON object')
@@ -112,7 +116,7 @@ def main():
         f = v.get('feeder')
         if f not in feeders:
             log.info(' Loading %s...' % f)
-            feeders[f] = construct_feeder(opts.config, f, log)
+            feeders[f] = construct_feeder(opts.data, f, log)
 
         if feeders[f] is None:
             log.warning(' Warning: No feeder named %s (referenced by %s).' % (f, s))
@@ -142,7 +146,7 @@ def main():
         def commit_changes():
             if not opts.dry_run:
                 log.info('  Committing resource changes...')
-                respath = get_resource_path(opts.config, f)
+                respath = get_resource_path(opts.data, f)
                 if not os.path.exists(os.path.dirname(respath)):
                     os.makedirs(os.path.dirname(respath))
                 with bz2.BZ2File(respath, 'wb') as fobj:

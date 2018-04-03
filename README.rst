@@ -49,8 +49,8 @@ Needtoknow expects two configuration files provided to it as JSON_:
 
 .. _JSON: https://www.json.org/
 
-By default, it looks for these files in the directory ``~/.needtoknow``. You can
-specify a different directory with the ``--config`` command line option.
+By default, it looks for these files in the directory ``~/.config/needtoknow``.
+You can specify a different directory with the ``--config`` command line option.
 
 conf.json
 ^^^^^^^^^
@@ -167,10 +167,16 @@ having a good day and I may do it for you :)
 
 Legal stuffs
 ------------
-All files in this repository are licensed under a Creative Commons
-Attribution-NonCommercial 3.0 Unported. You are free to reuse any of this code
-for any non-commercial purpose. For more information see
+All files in this repository created by Smattr (Matthew Fernandez) are licensed
+under a Creative Commons Attribution-NonCommercial 3.0 Unported. You are free to
+reuse any of this code for any non-commercial purpose. For more information see
 https://creativecommons.org/licenses/by-nc/3.0/.
+
+All copyrights pertaining to additions to and modifications of the above by
+bearbin (Alexander Harkness) are released into the public domain. For more
+(legal) information please see the `unlicense website`_.
+
+.. _`unlicense website`: https://unlicense.org
 
 .. [#] If you actually do this with Paul Graham, I highly doubt he will answer
    your email.
