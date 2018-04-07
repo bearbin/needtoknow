@@ -50,13 +50,16 @@ def main():
         help='configuration location')
     parser.add_argument('--data', default=os.path.expanduser('~/.local/share/needtoknow'),
         help='data location')
-    parser.add_argument('--feeds', default='feeds.json',
-        help='name of feeds file to check')
+    # Actual default is feeds.json.
+    parser.add_argument('--feeds', action='append', default=[],
+        help='name of feeds file to check)')
     parser.add_argument('--dry-run', action='store_true',
         help='scan feeds but don\'t send any updates')
     parser.add_argument('--debug', action='store_true',
         help='instead of catching exceptions, let them dump a back trace')
     opts = parser.parse_args()
+    if opts.feeds == []:
+        opts.feeds = ["feeds.json"]
 
     log = logging.getLogger('needtoknow')
     log.addHandler(logging.StreamHandler(sys.stderr))
@@ -95,34 +98,37 @@ def main():
         log.error('Failed to parse config: %s' % e)
         return -1
 
-    try:
-        with open(os.path.join(opts.config, opts.feeds)) as f:
-            feeds = json.load(f)
-        if not isinstance(feeds, collections.Mapping):
-            raise TypeError('feeds is not a JSON object')
-        if not all(isinstance(v, collections.Mapping)
-                for v in feeds.values()):
-            raise TypeError('feed values are not all JSON objects')
-    except Exception as e:
-        if opts.debug:
-            raise
-        log.error('Failed to parse feeds: %s' % e)
-        return -1
+    feedlist = []
+    for feeds in opts.feeds:
+        try:
+            with open(os.path.join(opts.config, feeds)) as f:
+                feedlist.append(json.load(f))
+            if not isinstance(feedlist[-1], collections.Mapping):
+                raise TypeError('feeds is not a JSON object')
+            if not all(isinstance(v, collections.Mapping)
+                    for v in feedlist[-1].values()):
+                raise TypeError('feed values are not all JSON objects')
+        except Exception as e:
+            if opts.debug:
+                raise
+            log.error('Failed to parse feeds: %s' % e)
+            return -1
 
     feeders = {}
 
     log.info('Loading feeders...')
-    for s, v in feeds.items():
-        f = v.get('feeder')
-        if f not in feeders:
-            log.info(' Loading %s...' % f)
-            feeders[f] = construct_feeder(opts.data, f, log)
+    for feeds in feedlist:
+        for s, v in feeds.items():
+            f = v.get('feeder')
+            if f not in feeders:
+                log.info(' Loading %s...' % f)
+                feeders[f] = construct_feeder(opts.data, f, log)
 
-        if feeders[f] is None:
-            log.warning(' Warning: No feeder named %s (referenced by %s).' % (f, s))
-        else:
-            if s in opts.include or (opts.include == [] and s not in opts.exclude):
-                feeders[f].add(s, v)
+            if feeders[f] is None:
+                log.warning(' Warning: No feeder named %s (referenced by %s).' % (f, s))
+            else:
+                if s in opts.include or (opts.include == [] and s not in opts.exclude):
+                    feeders[f].add(s, v)
 
     # Set timeout on socket connections to 60 seconds. Without this, some
     # platforms have no timeout (even on the kernel side) and socket connections
