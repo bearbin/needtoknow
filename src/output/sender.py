@@ -116,11 +116,8 @@ class Sender(object):
         else:
             m['From'] = entry.name
         m['Subject'] = entry.subject
-        if entry.date:
-            stamp = time.mktime(entry.date)
-            m['Date'] = email.utils.formatdate(stamp)
-        else:
-            stamp = time.time()
+        stamp = time.mktime(entry.date) if entry.date else time.time()
+        m['Date'] = email.utils.formatdate(stamp)
         log.info('  Sending "%s"...' % entry.subject)
         self.conn.append(self.feed_folder(entry), '',
             imaplib.Time2Internaldate(stamp), m.as_string().encode('utf-8', 'replace'))
