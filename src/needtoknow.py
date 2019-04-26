@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, bz2, collections, fcntl, importlib, json, logging, numbers, os, pickle, re, socket, sys, urllib.error, urllib.request
+import argparse, bz2, collections.abc, fcntl, importlib, json, logging, numbers, os, pickle, re, socket, sys, urllib.error, urllib.request
 from output import sender
 from feeders.base import SyncRequest
 
@@ -86,7 +86,7 @@ def main():
     try:
         with open(os.path.join(opts.config, 'conf.json')) as f:
             conf = json.load(f)
-        if not isinstance(conf, collections.Mapping):
+        if not isinstance(conf, collections.abc.Mapping):
             raise TypeError('configuration is not a JSON object')
         if not all(isinstance(v, (str, numbers.Integral))
                 for v in conf.values()):
@@ -103,9 +103,9 @@ def main():
         try:
             with open(os.path.join(opts.config, feeds)) as f:
                 feedlist.append(json.load(f))
-            if not isinstance(feedlist[-1], collections.Mapping):
+            if not isinstance(feedlist[-1], collections.abc.Mapping):
                 raise TypeError('feeds is not a JSON object')
-            if not all(isinstance(v, collections.Mapping)
+            if not all(isinstance(v, collections.abc.Mapping)
                     for v in feedlist[-1].values()):
                 raise TypeError('feed values are not all JSON objects')
         except Exception as e:
